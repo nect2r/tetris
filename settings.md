@@ -1,0 +1,1 @@
+https://night-tailwindcss.vercel.app/docs/installation

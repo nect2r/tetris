@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로비</title>
+    <link href="/tailwind.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container flex mx-auto">
+        <div class="flex flex-col justify-between box-border h-96 w-96 p-4 border-2 ">
+            <div class="h-auto overflow-y-auto bg-scroll" id="chatLogs">
+
+            </div>
+            <div class="h-auto">
+                <form class="form-inline">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="message"></label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="message" type="text" placeholder="Message">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // 채팅창의 스크롤바를 아래로 내리는 함수
+        function downScroll() {
+            var objDiv = document.getElementById("chatLogs");
+            objDiv.scrollTop = objDiv.scrollHeight;
+        }
+
+        // isTextEmpty 함수는 문자열이 공백이거나 null인지 체크한다.
+        function isTextEmpty(text) {
+            if (text == null || text == "") {
+                return true;
+            }
+            return false;
+        }
+
+        $(function () {
+            // socket.io 서버에 접속한다
+            const socket = io.connect('http://localhost:3000/lobby', { // room 네임스페이스
+                path: '/socket.io'
+            });
+
+            // 서버로 자신의 정보를 전송한다.
+            socket.emit("login", {
+                name: makeRandomName(),
+                userid: "ungmo2@gmail.com"
+            });
+
+            // 서버로부터의 메시지가 수신되면
+            socket.on("login", function (data) {
+                $("#chatLogs").append("<div><strong>" + data + "</strong> 님이 로비에 참가하셨습니다.</div>");
+                downScroll();
+            });
+
+            // 서버로부터의 메시지가 수신되면
+            socket.on("chat", function (data) {
+                $("#chatLogs").append("<div><strong>" + data.from.name + " : </strong>" + data.msg + "</div>");
+                downScroll();
+            });
+
+            // Send 버튼이 클릭되면
+            $("form").submit(function (e) {
+                e.preventDefault();
+                var $message = $("#message");
+
+                if(isTextEmpty($message.val())) {
+                    return;
+                }
+
+                // 서버로 메시지를 전송한다.
+                socket.emit("chat", { msg: $message.val() });
+                $message.val("");
+            });
+
+            function makeRandomName() {
+                var name = "";
+                var possible = "abcdefghijklmnopqrstuvwxyz";
+                for (var i = 0; i < 3; i++) {
+                    name += possible.charAt(Math.floor(Math.random() * possible.length));
+                }
+                return name;
+            }
+        });
+    </script>
+</body>
+
+</html>
