@@ -4,7 +4,7 @@ var server = require('http').createServer(app);
 
 // http server를 socket.io server로 upgrade한다
 var io = require('socket.io')(server);
-const lobby = io.of('/lobby');
+var lobby = io.of('/lobby');
 
 // localhost:3000으로 서버에 접속하면 클라이언트로 index.html을 전송한다
 app.get('/', function (req, res) {
@@ -16,6 +16,17 @@ app.use('/', express.static(__dirname + '/'));
 
 // connection이 수립되면 event handler function의 인자로 socket인 들어온다
 lobby.on('connection', function (socket) {
+
+    socket.on('lobbyUsers', function (data) {
+        var sockets = lobby.sockets;
+        var names = new Array();
+
+        for (var socketSibal of sockets) {  
+            names.push(socketSibal[1].name);
+        }
+
+        lobby.to(socket.id).emit('lobbyUsersRes', names);
+    });
 
     // 접속한 클라이언트의 정보가 수신되면
     socket.on('login', function (data) {
