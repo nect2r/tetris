@@ -17,15 +17,41 @@ app.use('/', express.static(__dirname + '/'));
 // connection이 수립되면 event handler function의 인자로 socket인 들어온다
 lobby.on('connection', function (socket) {
 
+    socket.join("room1");
+    publicRooms();
+
+    function publicRooms() {
+        const {
+            adapter : {
+                    sids, rooms           
+            } 
+        } = lobby;
+
+        // public room list 만들기
+        const publicRooms = [];
+        rooms.forEach((_, key) => {
+            if(sids.get(key) === undefined) {
+                publicRooms.push(key);
+            }
+        });
+
+        publicRooms.forEach(function(room) {
+            console.log(room);
+        });
+
+        return publicRooms;
+    }
+
     socket.on('lobbyUsers', function (data) {
         var sockets = lobby.sockets;
         var names = new Array();
 
-        for (var socketSibal of sockets) {  
-            names.push(socketSibal[1].name);
+        for (var socket of sockets) {  
+            names.push(socket[1].name);
         }
 
         lobby.to(socket.id).emit('lobbyUsersRes', names);
+        console.log(process.pid);
     });
 
     // 접속한 클라이언트의 정보가 수신되면
