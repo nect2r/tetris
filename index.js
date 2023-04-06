@@ -1,9 +1,17 @@
+const { createClient } = require("redis");
+const { createAdapter } = require("@socket.io/redis-adapter");
+
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 
+const pubClient = createClient({ url: "redis://localhost:6379" });
+const subClient = pubClient.duplicate();
+
 // http server를 socket.io server로 upgrade한다
 var io = require('socket.io')(server);
+io.adapter(createAdapter(pubClient, subClient));
+
 var lobby = io.of('/lobby');
 
 // localhost:3000으로 서버에 접속하면 클라이언트로 index.html을 전송한다
