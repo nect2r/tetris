@@ -24,18 +24,43 @@ app.get('/', function (req, res) {
 app.use('/', express.static(__dirname + '/'));
 
 room.on('connection', function (socket) {
-    console.log("룸");
-    socket.join("room1");
+
+    let roomName = null;
+
+    function roomUsers() {
+        // var sockets = new Array();
+
+        room.sockets.forEach(sock => {
+            console.log(sock);
+        });
+
+        // room.adapter.rooms.forEach(socketId => {
+        //     console.log(room.sockets); // sockets.push();
+        // });
+
+        // console.log(roomUsers);
+
+        // return sockets;
+    }
+
+    //joinRoom
+    socket.on('joinRoom', function (data) {
+        socket.join(data);
+        roomName = data;
+    });
 
     socket.on('lobbyUsers', function (data) {
         var sockets = room.sockets;
         var names = new Array();
 
+        // console.log(room.adapter.rooms.get(roomName));
+        roomUsers();
+
         for (var socketItem of sockets) {  
             names.push(socketItem[1].name);
         }
 
-        room.to("room1").to(socket.id).emit('lobbyUsersRes', names);
+        room.to(roomName).to(socket.id).emit('lobbyUsersRes', names);
     });
 
     // 접속한 클라이언트의 정보가 수신되면
@@ -47,7 +72,7 @@ room.on('connection', function (socket) {
         socket.userid = data.userid;
 
         // 접속된 모든 클라이언트에게 메시지를 전송한다
-        room.to("room1").emit('login', data.name);
+        room.to(roomName).emit('login', data.name);
     });
 
     // 클라이언트로부터의 메시지가 수신되면
@@ -63,7 +88,12 @@ room.on('connection', function (socket) {
         };
 
         // 접속된 모든 클라이언트에게 메시지를 전송한다
-        room.to("room1").emit('chat', msg);
+        room.to(roomName).emit('chat', msg);
+    });
+
+    socket.on('makeRoom', function () {
+        socket.join("room_" + socket.id);
+        roomName = "room_" + socket.id;
     });
 });
 

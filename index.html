@@ -24,7 +24,7 @@
                 </div>
                 <!-- 방만들기, 참여하기등 버튼 영역 -->
                 <div class="w-1/3 p-4">
-                    <button id="moveRoom">방만들기</button>
+                    <button id="makeRoom">방만들기</button>
                 </div>
             </div>
             <!-- 소셜 영역 -->
@@ -68,7 +68,7 @@
             return false;
         }
 
-        function moveLoom() {
+        function connLoom() {
             let socket = io.connect('http://localhost:3000/room', { // room 네임스페이스
                 path: '/socket.io'
             });
@@ -143,7 +143,7 @@
                 var publicRoomsHtml = "";
 
                 publicRooms.forEach(function (room) {
-                    publicRoomsHtml += "<div>" + room + "</div>";
+                    publicRoomsHtml += "<div class='room'>" + room + "</div>";
                 });
 
                 $("#roomList").html(publicRoomsHtml);
@@ -187,9 +187,16 @@
                 $message.val("");
             });
 
-            $(document).on('click', '#moveRoom', function () {
+            $(document).on('click', '#makeRoom', function () {
                 socket.emit("forceDisconnect");
-                socket = moveLoom();
+                socket = connLoom();
+                socket.emit("makeRoom");
+            });
+
+            $(document).on('click', '.room', function () {
+                socket.emit("forceDisconnect");
+                socket = connLoom();
+                socket.emit("joinRoom", $(this).text());
             });
         });
     </script>
