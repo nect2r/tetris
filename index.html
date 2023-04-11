@@ -168,11 +168,6 @@
             // socket.io 서버에 접속한다
             socket = moveLobby();
 
-            // 1초마다 접속자정보 요청
-            setInterval(function () {
-                socket.emit("lobbyUsers");
-            }, 1000);
-
             // Send 버튼이 클릭되면
             $("form").submit(function (e) {
                 e.preventDefault();
