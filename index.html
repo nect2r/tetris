@@ -148,7 +148,7 @@
             });
 
             // 서버로부터 클라이언트 접속자정보들이 수신되면
-            socket.on("lobbyUsersRes", function (data, publicRooms) {
+            socket.on("lobbyUsersRes", function (data) {
                 var lobbyUsersListHtml = "";
 
                 data.forEach(function (item, index) {
@@ -157,6 +157,17 @@
 
                 $("#lobbyUsersListWrap").html(lobbyUsersListHtml);
                 $("#lobbyUsersCount").text(data.length + "명");
+            });
+
+            // 서버로부터 클라이언트 방정보들이 수신되면
+            socket.on("lobbyRoomsRes", function (data) {
+                var publicRoomsHtml = "";
+
+                data.forEach(function (room) {
+                    publicRoomsHtml += "<div class='room'>" + room + "</div>";
+                });
+
+                $("#roomList").html(publicRoomsHtml);
             });
 
             return socket;

@@ -32,7 +32,7 @@ function connection(lobby) {
                 }
             });
 
-            return publicRooms;
+            socket.emit('lobbyRoomsRes', publicRooms);
         }
         /* 정보 이벤트 끝 */
 
@@ -51,6 +51,7 @@ function connection(lobby) {
 
             // lobby 접속자 목록 갱신
             refreshLoginUser();
+            refreshPublicRooms();
         });
 
         // 클라이언트가 접속을 강제종료하면
