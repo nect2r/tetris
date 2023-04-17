@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로비</title>
-    <link href="/tailwind.css" rel="stylesheet">
+    <link href="/css/tailwind.css" rel="stylesheet">
 </head>
 
 <body>
@@ -68,7 +68,18 @@
             return false;
         }
 
-        function connLoom() {
+        // 랜덤한 이름을 생성한다.
+        function makeRandomName() {
+            var name = "";
+            var possible = "abcdefghijklmnopqrstuvwxyz";
+            for (var i = 0; i < 3; i++) {
+                name += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return name;
+        }
+
+        // Room namespace 연결
+        function connRoom() {
             let socket = io.connect('http://localhost:3000/room', { // room 네임스페이스
                 path: '/socket.io'
             });
@@ -106,7 +117,8 @@
             return socket;
         }
 
-        function moveLobby() {
+        // Lobby namespace 연결
+        function connLobby() {
             let socket = io.connect('http://localhost:3000/lobby', { // room 네임스페이스
                 path: '/socket.io'
             });
@@ -120,6 +132,12 @@
             // 서버로부터의 메시지가 수신되면
             socket.on("login", function (data) {
                 $("#chatLogs").append("<div><strong>" + data + "</strong> 님이 로비에 참가하셨습니다.</div>");
+                downScroll();
+            });
+
+            // 서버로부터의 메시지가 수신되면
+            socket.on("logout", function (data) {
+                $("#chatLogs").append("<div><strong>" + data + "</strong> 님이 로비에서 나가셨습니다.</div>");
                 downScroll();
             });
 
@@ -139,26 +157,9 @@
 
                 $("#lobbyUsersListWrap").html(lobbyUsersListHtml);
                 $("#lobbyUsersCount").text(data.length + "명");
-
-                var publicRoomsHtml = "";
-
-                publicRooms.forEach(function (room) {
-                    publicRoomsHtml += "<div class='room'>" + room + "</div>";
-                });
-
-                $("#roomList").html(publicRoomsHtml);
             });
 
             return socket;
-        }
-
-        function makeRandomName() {
-            var name = "";
-            var possible = "abcdefghijklmnopqrstuvwxyz";
-            for (var i = 0; i < 3; i++) {
-                name += possible.charAt(Math.floor(Math.random() * possible.length));
-            }
-            return name;
         }
 
         var socket;
@@ -166,7 +167,7 @@
 
         $(function () {
             // socket.io 서버에 접속한다
-            socket = moveLobby();
+            socket = connLobby();
 
             // Send 버튼이 클릭되면
             $("form").submit(function (e) {
@@ -184,13 +185,13 @@
 
             $(document).on('click', '#makeRoom', function () {
                 socket.emit("forceDisconnect");
-                socket = connLoom();
+                socket = connRoom();
                 socket.emit("makeRoom");
             });
 
             $(document).on('click', '.room', function () {
                 socket.emit("forceDisconnect");
-                socket = connLoom();
+                socket = connRoom();
                 socket.emit("joinRoom", $(this).text());
             });
         });

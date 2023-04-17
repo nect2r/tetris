@@ -6,9 +6,9 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
 var lobby = io.of('/lobby');
-var lobbyModule = require('./lobby');
+var lobbyModule = require('./js/lobby');
 var room = io.of('/room');
-var roomModule = require('./room');
+var roomModule = require('./js/room');
 
 // localhost:3000으로 서버에 접속하면 클라이언트로 index.html을 전송한다
 app.get('/', function (req, res) {
